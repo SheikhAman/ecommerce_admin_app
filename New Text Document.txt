@@ -1,0 +1,92 @@
+                                   Simple E-Com Project
+                                     
+                              Mobile Application Development
+
+                                 Project Specification
+
+                        Admin App : 
+
+                     1. Admin Login.
+                
+                           a. Verify Admin Account
+
+                     2. Admin Dashboard
+
+                       (Grid items)  a. Add product
+                                          1. Add Product Information
+                                          2. Add Purchase Information
+                                          3. Barcode Scanning (|?|?|?) (Google Ml kit use kore korte hoi)
+
+                                     b. View Product
+                                          1. Search Filter
+                                          2. Product Details
+                                          3. Update Product
+                                          4. Show Purchase History for specific product
+                                          5. Show Stock Count
+                                          
+
+                                     c. Add Category
+
+                                     d. View Category
+                                     
+                                     e. Product Bundle(!)
+                                     
+                                     f. Order
+                                          1. Show Orders by Status-Delivered,Pending,Cancelled,Returned
+                                          2. Change Order Status
+
+                                     g. User
+                                          1. Show All Users.
+                                          2. Filter User by Purchase,Location,Age,Gender,Activity,
+
+                                     h. Settings
+                                          1. Set Delivery Charge, Discount Amount,Vat etc.
+
+                                     e. Report
+                                          1. Daily,Weekly,Mothly, Yearly Sale Report
+                                          2. Daily,Weekly,Mothly, Yearly Sale Purchase Report
+                                          3. Highest Sold Product/ Highest Rated Product
+                                          4. Top Categories
+                                          5. Location/Age/Gender Based Sale Report
+                                          6. Profit Margin
+
+                               
+
+
+
+                     User App.
+
+                          1. User Login and Registration with Phone verification
+
+                          2. Product List 
+                 
+                                 a. Search by Product name, category, price/ price range
+                                 b. Show Featured Products
+                                 c. See Product Details
+                                 d. Add to Favorite (Login Required)
+                                 e. Add to Card (Login Required)
+                                 f. Add Comment (Login Required)
+                                 g. Add Rating  (Login Required)
+ 
+                         3. User Profile
+                         
+                                a. Update Information
+                                b. Show Order History
+
+                         4. Cart
+                                
+                                 a. Change Quantity
+                                 b. Remove Item
+                                 c. Clear Cart
+                                 d. Show Subtotal
+                         
+                         5. Checkout
+                                 a. Customer Information
+                                 b. Payment Method
+                                 c. Show Invoice
+                                 d. Delivery Charge (may vary to Locations)
+                                 e. Discount (if any)
+                                 f. Vat
+                                 g. Show Grand Total
+                                 h. Show Successfull Message
+
