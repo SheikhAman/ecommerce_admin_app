@@ -8,14 +8,9 @@ const String productAvailable = "available";
 const String productImageUrl = "imageUrl";
 
 class ProductModel {
-  String? id;
-  String? name;
-  String? category;
-  String? description;
+  String? id, name, category, description, imageUrl;
   num salePrice;
-  bool featured;
-  bool available;
-  String? imageUrl;
+  bool featured, available;
 
   ProductModel(
       {this.id,

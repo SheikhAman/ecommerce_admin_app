@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:ecom_day_42/providers/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class NewProductPage extends StatefulWidget {
   static const String routeName = '/new_product_page';
@@ -26,9 +28,7 @@ class _NewProductPageState extends State<NewProductPage> {
 
   String? purchaseDate;
 
-  String bookCategory = 'OTHERS';
-
-  var categoryItems = ['LAPTOP', 'WATCH', 'DRESS', 'MOBILE', 'BIKE', 'OTHERS'];
+  String? dropdownValue;
 
   @override
   void dispose() {
@@ -202,7 +202,7 @@ class _NewProductPageState extends State<NewProductPage> {
                     contentPadding: EdgeInsets.only(left: 10),
                     focusColor: Colors.white,
                     prefixIcon: Icon(Icons.monetization_on),
-                    hintText: 'Enter the product price',
+                    hintText: 'Enter the product purchase price',
                     hintStyle: TextStyle(
                       color: Colors.grey,
                       fontWeight: FontWeight.normal,
@@ -330,34 +330,38 @@ class _NewProductPageState extends State<NewProductPage> {
                       fontSize: 16,
                     ),
                   ),
-                  trailing: DropdownButton(
-                      borderRadius: BorderRadius.circular(20),
-                      dropdownColor: Colors.white,
-                      underline: Text(''),
-                      value: bookCategory,
-                      icon: Padding(
-                        padding: EdgeInsets.all(12),
-                        child: Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Colors.red,
-                        ),
-                      ),
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w500),
-                      items: categoryItems.map((String item) {
-                        return DropdownMenuItem(
-                          value: item,
-                          child: Center(
-                            child: Text(item),
+                  trailing: Consumer<ProductProvider>(
+                    builder: (context, provider, _) => DropdownButton<String>(
+                        hint: const Text('Select'),
+                        borderRadius: BorderRadius.circular(20),
+                        dropdownColor: Colors.white,
+                        underline: Text(''),
+                        // user je value ta sellect korbe setai hoche dropdownValue
+                        value: dropdownValue,
+                        icon: Padding(
+                          padding: EdgeInsets.all(12),
+                          child: Icon(
+                            Icons.keyboard_arrow_down,
+                            color: Colors.red,
                           ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          bookCategory = newValue!;
-                        });
-                      }),
+                        ),
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontWeight: FontWeight.w500),
+                        items: provider.categoryList.map((model) {
+                          return DropdownMenuItem(
+                            value: model.catName,
+                            child: Center(
+                              child: Text(model.catName!),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (newValue) {
+                          setState(() {
+                            dropdownValue = newValue;
+                          });
+                        }),
+                  ),
                 ),
               ),
               SizedBox(

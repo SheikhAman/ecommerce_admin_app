@@ -1,8 +1,10 @@
 import 'package:ecom_day_42/pages/dashboard_page.dart';
 import 'package:ecom_day_42/pages/launcher_page.dart';
 import 'package:ecom_day_42/pages/login_page.dart';
+import 'package:ecom_day_42/providers/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 
 import 'pages/category_page.dart';
 import 'pages/new_product_page.dart';
@@ -15,7 +17,9 @@ import 'pages/user_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => ProductProvider()),
+  ], child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
