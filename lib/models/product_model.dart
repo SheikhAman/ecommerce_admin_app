@@ -9,7 +9,7 @@ const String productImageUrl = "imageUrl";
 
 class ProductModel {
   String? id, name, category, description, imageUrl;
-  num salePrice;
+  num? salePrice;
   bool featured, available;
 
   ProductModel(
@@ -17,7 +17,7 @@ class ProductModel {
       this.name,
       this.category,
       this.description,
-      required this.salePrice,
+      this.salePrice,
       this.featured = true,
       this.available = true,
       this.imageUrl});
@@ -45,4 +45,10 @@ class ProductModel {
         available: map[productAvailable],
         imageUrl: map[productImageUrl],
       );
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return 'ProductModel{id: $id,name: $name, category:$category,description:$description,salePrice:$salePrice,featured:$featured,available:$available,                                             }';
+  }
 }

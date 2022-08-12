@@ -1,5 +1,9 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecom_day_42/models/date_model.dart';
+import 'package:ecom_day_42/models/product_model.dart';
+import 'package:ecom_day_42/models/purchase_model.dart';
 import 'package:ecom_day_42/providers/product_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,11 +28,11 @@ class _NewProductPageState extends State<NewProductPage> {
 
   ImageSource source = ImageSource.camera;
 
-  String? imagePath;
+  String? _imageUrl;
 
   String? purchaseDate;
 
-  String? dropdownValue;
+  String? _category;
 
   @override
   void dispose() {
@@ -58,7 +62,7 @@ class _NewProductPageState extends State<NewProductPage> {
                 child: Stack(
                   children: [
                     Center(
-                      child: imagePath == null
+                      child: _imageUrl == null
                           ? Image.asset(
                               'images/profile.png',
                               height: 100,
@@ -67,7 +71,7 @@ class _NewProductPageState extends State<NewProductPage> {
                               fit: BoxFit.cover,
                             )
                           : Image.file(
-                              File(imagePath!),
+                              File(_imageUrl!),
                               height: 100,
                               width: 100,
                               alignment: Alignment.center,
@@ -330,37 +334,46 @@ class _NewProductPageState extends State<NewProductPage> {
                       fontSize: 16,
                     ),
                   ),
-                  trailing: Consumer<ProductProvider>(
-                    builder: (context, provider, _) => DropdownButton<String>(
-                        hint: const Text('Select'),
-                        borderRadius: BorderRadius.circular(20),
-                        dropdownColor: Colors.white,
-                        underline: Text(''),
-                        // user je value ta sellect korbe setai hoche dropdownValue
-                        value: dropdownValue,
-                        icon: Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Icon(
-                            Icons.keyboard_arrow_down,
-                            color: Colors.red,
-                          ),
+                  title: Consumer<ProductProvider>(
+                    builder: (context, provider, _) =>
+                        DropdownButtonFormField<String>(
+                      hint: const Text('Select'),
+                      borderRadius: BorderRadius.circular(20),
+                      dropdownColor: Colors.white,
+                      isExpanded: false,
+                      // user je value ta sellect korbe setai hoche _category
+                      value: _category,
+                      icon: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: Icon(
+                          Icons.keyboard_arrow_down,
+                          color: Colors.red,
                         ),
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontWeight: FontWeight.w500),
-                        items: provider.categoryList.map((model) {
-                          return DropdownMenuItem(
-                            value: model.catName,
-                            child: Center(
-                              child: Text(model.catName!),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (newValue) {
-                          setState(() {
-                            dropdownValue = newValue;
-                          });
-                        }),
+                      ),
+
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500),
+                      items: provider.categoryList.map((model) {
+                        return DropdownMenuItem<String>(
+                          value: model.catName,
+                          child: Center(child: Text(model.catName!)),
+                        );
+                      }).toList(),
+                      onChanged: (newValue) {
+                        setState(() {
+                          _category = newValue;
+                        });
+                      },
+
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a category';
+                        }
+                        // user kono kichu select na korle null return korbe
+                        return null;
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -368,14 +381,14 @@ class _NewProductPageState extends State<NewProductPage> {
                 height: 20,
               ),
               ElevatedButton(
-                onPressed: addProduct,
+                onPressed: saveProduct,
                 style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20))),
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    'Add Product',
+                    'Save Product',
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
@@ -388,11 +401,15 @@ class _NewProductPageState extends State<NewProductPage> {
   }
 
   void getImage() async {
-    final pickedImage = await ImagePicker().pickImage(source: source);
-    if (pickedImage != null) {
-      setState(() {
-        imagePath = pickedImage.path;
-      });
+    final selectedImage = await ImagePicker().pickImage(source: source);
+    if (selectedImage != null) {
+      try {
+        final url =
+            await context.read<ProductProvider>().updateImage(selectedImage);
+        setState(() {
+          _imageUrl = url;
+        });
+      } catch (e) {}
     }
   }
 
@@ -403,6 +420,7 @@ class _NewProductPageState extends State<NewProductPage> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
+    print('selectDate' + selectDate.toString());
     if (selectDate != null) {
       setState(() {
         purchaseDate = DateFormat("dd/MM/yy").format(selectDate);
@@ -410,5 +428,57 @@ class _NewProductPageState extends State<NewProductPage> {
     }
   }
 
-  void addProduct() {}
+// save korle 2ta class er object create hobe
+  void saveProduct() {
+    if (formKey.currentState!.validate()) {
+      final productModel = ProductModel(
+        name: productNameController.text,
+        description: productDescriptionController.text,
+        salePrice: num.parse(productSalePriceController.text),
+        category: _category,
+        imageUrl: _imageUrl,
+        // id porre asbe
+      );
+
+      final purchaseModel = PurchaseModel(
+          dateModel: DateModel(
+            timestamp: Timestamp.now(),
+            day: DateTime.now().day,
+            month: DateTime.now().month,
+            year: DateTime.now().year,
+          ),
+          purchaseprice: num.parse(productPurchasePriceController.text),
+          quantity: num.parse(productQuantityController.text));
+
+// _category hoche dropdownValue
+      final catModel =
+          context.read<ProductProvider>().getCategoryModelByCatName(_category!);
+
+// catModel hoche  akahte category er model
+      context
+          .read<ProductProvider>()
+          .addNewProduct(productModel, purchaseModel, catModel)
+          .then((_) {
+// then mane successfull vabe insert hoise
+// tarpor sob gulo field reset kore dibo
+        _resetField();
+      }).catchError((error) {
+        // batch operation successfull na hole error show korbe terminal e
+      });
+    }
+  }
+
+  void _resetField() {
+    setState(() {
+      productNameController.clear();
+      productDescriptionController.clear();
+      productSalePriceController.clear();
+      productPurchasePriceController.clear();
+      productQuantityController.clear();
+
+      _imageUrl = null;
+      // category  hoche droupdownvalue category er
+      _category = null;
+    });
+  }
 }

@@ -1,10 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecom_day_42/models/category_model.dart';
+import 'package:ecom_day_42/models/product_model.dart';
+import 'package:ecom_day_42/models/purchase_model.dart';
 
 class DBHelper {
   static const String collectionAdmin = 'Admins';
-
   static const String collectionCategories = 'Categories';
+  static const String collectionProduct = 'Products';
+  static const String collectionPurchase = 'Purchase';
+  static const String collectionUser = 'User';
+  static const String collectionOrder = 'Order';
+  static const String collectionDetails = 'OrderDetails';
+  static const String collectionSettings = 'Settings';
+  static const String documentConstant = 'orderConstant';
 
   static FirebaseFirestore _db = FirebaseFirestore.instance;
 
@@ -25,7 +33,45 @@ class DBHelper {
     return doc.set(categoryModel.toMap());
   }
 
+// notun akta document e productModel dhukbe -> insert
+// notun areak document e purchaseModel dhukbe -> insert
+// catId je document ache tar vitore  je count namer field ache seta update hobe -> update
+// kokhono jodi amun hoi akta table e data dhuklo arek table ba data dhuklo na tai amra batch  operation kori
+// batch operation  -> amake insure korte hobe 3ta  query jate execute hoi jodi  kono akta fail hoi tahole baki 2ta o fail korbe
+// prothom e writebatch er object create korbo example wb
+// commit method call korle se tar kaj kora suru kore dei. query gulo step by step kora suru kore
+  static Future<void> addProduct(ProductModel productModel,
+      PurchaseModel purchaseModel, String catId, num count) {
+    final wd = _db.batch(); // batch operation er object create korsi
+    final proDoc =
+        _db.collection(collectionProduct).doc(); // document create korlam
+    final purDoc =
+        _db.collection(collectionPurchase).doc(); // document create korlam
+    final catDoc = _db
+        .collection(collectionCategories)
+        .doc(catId); // ai doc e update query chalabo
+
+    productModel.id = proDoc.id; // model er field e docment id set koralam
+    purchaseModel.id = purDoc.id; // model er field e docment id set koralam
+    purchaseModel.productID =
+        purDoc.id; // model er field e docment id set koralam
+
+// wb.set mane se future e data save korbe databaase e
+    wd.set(
+        proDoc, purchaseModel.toMap()); // document e map akare data save korlam
+    wd.set(purDoc, purchaseModel.toMap());
+    wd.update(catDoc, {
+      'productCount': count
+    }); // batch operation e ami document id ar je value update kormu map seta disi
+
+    return wd.commit();
+  }
+
 // category collection e notun collection get korar query
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllCategory() =>
       _db.collection(collectionCategories).snapshots();
+
+// collection product  er  notun collection get korar query
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllProducts() =>
+      _db.collection(collectionProduct).snapshots();
 }
