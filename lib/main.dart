@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'pages/category_page.dart';
 import 'pages/new_product_page.dart';
 import 'pages/order_page.dart';
+import 'pages/product_details_page.dart';
 import 'pages/product_page.dart';
 import 'pages/report_page.dart';
 import 'pages/settings_page.dart';
@@ -38,6 +39,7 @@ class MyApp extends StatelessWidget {
         DashboardPage.routeName: (context) => DashboardPage(),
         CategoryPage.routeName: (context) => CategoryPage(),
         NewProductPage.routeName: (context) => NewProductPage(),
+        ProductDetailsPage.routeName: (context) => ProductDetailsPage(),
         OrderPage.routeName: (context) => OrderPage(),
         ProductPage.routeName: (context) => ProductPage(),
         ReportPage.routeName: (context) => ReportPage(),

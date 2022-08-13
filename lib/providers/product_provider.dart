@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecom_day_42/db/db_helper.dart';
 import 'package:ecom_day_42/models/category_model.dart';
 import 'package:ecom_day_42/models/product_model.dart';
@@ -9,8 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProductProvider extends ChangeNotifier {
-  List<ProductModel> productList = [];
   List<CategoryModel> categoryList = [];
+  List<ProductModel> productList = [];
+  // akta  nirdisto product er purchase List
+  List<PurchaseModel> purchaseListOfSpecificProduct = [];
 
 // addCategory method call korum  category page theke
   Future<void> addCategories(CategoryModel categoryModel) =>
@@ -45,10 +48,31 @@ class ProductProvider extends ChangeNotifier {
     });
   }
 
+  //  akta  nirdisto product er purchase List
+  getPurchaseByProduct(String pid) {
+    DBHelper.getPurchaseByProductId(pid).listen((snapshot) {
+      purchaseListOfSpecificProduct = List.generate(
+        snapshot.docs.length,
+        (index) => PurchaseModel.fromMap(snapshot.docs[index].data()),
+      );
+      print(purchaseListOfSpecificProduct.length);
+      notifyListeners();
+    });
+  }
+
 // category model er name er shate match hole sei  category model er object return korbe
   CategoryModel getCategoryModelByCatName(String name) {
     final catModel = categoryList.firstWhere((model) => model.catName == name);
     return catModel;
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> getProductById(String id) =>
+      DBHelper.getProductById(id);
+
+  // common method for updating Product details info
+  Future<void> updateProduct(String id, String field, dynamic value) {
+    // field bolte amra key o dhorte pari
+    return DBHelper.updateProduct(id, {field: value});
   }
 
   Future<String> updateImage(XFile xFile) async {

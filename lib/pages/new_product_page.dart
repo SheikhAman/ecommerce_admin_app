@@ -5,6 +5,7 @@ import 'package:ecom_day_42/models/date_model.dart';
 import 'package:ecom_day_42/models/product_model.dart';
 import 'package:ecom_day_42/models/purchase_model.dart';
 import 'package:ecom_day_42/providers/product_provider.dart';
+import 'package:ecom_day_42/utils/helper_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
@@ -30,7 +31,9 @@ class _NewProductPageState extends State<NewProductPage> {
 
   String? _imageUrl;
 
-  String? purchaseDate;
+  DateTime? _productPurchaseDate;
+
+  bool _isUploading = false;
 
   String? _category;
 
@@ -51,6 +54,18 @@ class _NewProductPageState extends State<NewProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('New Product Page'),
+        actions: [
+          _isUploading
+              ? CircularProgressIndicator(
+                  color: Colors.white,
+                )
+              : TextButton(
+                  onPressed: saveProduct,
+                  child: Text(
+                    'Save',
+                    style: TextStyle(color: Colors.black),
+                  ))
+        ],
       ),
       body: Form(
         key: formKey,
@@ -64,14 +79,14 @@ class _NewProductPageState extends State<NewProductPage> {
                     Center(
                       child: _imageUrl == null
                           ? Image.asset(
-                              'images/profile.png',
+                              'images/placeholder.jpg',
                               height: 100,
                               width: 100,
                               alignment: Alignment.center,
                               fit: BoxFit.cover,
                             )
-                          : Image.file(
-                              File(_imageUrl!),
+                          : Image.network(
+                              _imageUrl!,
                               height: 100,
                               width: 100,
                               alignment: Alignment.center,
@@ -305,15 +320,18 @@ class _NewProductPageState extends State<NewProductPage> {
                   ),
                   title: Center(
                     child: Text(
-                      purchaseDate ?? 'No date chosen',
+                      _productPurchaseDate != null
+                          ? getFormattedDateTime(_productPurchaseDate!,
+                              pattern: 'dd/MM/yyyy')
+                          : 'No Date Chosen',
                       style: TextStyle(
-                          color: purchaseDate == null
+                          color: _productPurchaseDate == null
                               ? Colors.grey
                               : Theme.of(context).primaryColor),
                     ),
                   ),
                   trailing: IconButton(
-                      onPressed: showPurchaseDatePicker,
+                      onPressed: show_productPurchaseDatePicker,
                       icon: Icon(
                         Icons.date_range,
                         color: Colors.red,
@@ -377,22 +395,22 @@ class _NewProductPageState extends State<NewProductPage> {
                   ),
                 ),
               ),
-              SizedBox(
-                height: 20,
-              ),
-              ElevatedButton(
-                onPressed: saveProduct,
-                style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20))),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    'Save Product',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-              ),
+              // SizedBox(
+              //   height: 20,
+              // ),
+              // ElevatedButton(
+              //   onPressed: saveProduct,
+              //   style: ElevatedButton.styleFrom(
+              //       shape: RoundedRectangleBorder(
+              //           borderRadius: BorderRadius.circular(20))),
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(8.0),
+              //     child: Text(
+              //       'Save Product',
+              //       style: TextStyle(fontSize: 16),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -403,33 +421,51 @@ class _NewProductPageState extends State<NewProductPage> {
   void getImage() async {
     final selectedImage = await ImagePicker().pickImage(source: source);
     if (selectedImage != null) {
+      setState(() {
+        // image upload howar  age CircularProgressIndicator ghurbe
+        _isUploading = true;
+      });
       try {
         final url =
             await context.read<ProductProvider>().updateImage(selectedImage);
         setState(() {
           _imageUrl = url;
+          // image upload howar  age CircularProgressIndicator off hoye jabe
+          _isUploading = false;
         });
       } catch (e) {}
     }
   }
 
-  void showPurchaseDatePicker() async {
-    DateTime? selectDate = await showDatePicker(
+  void show_productPurchaseDatePicker() async {
+    DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    print('selectDate' + selectDate.toString());
-    if (selectDate != null) {
+    print('selectDate' + selectedDate.toString());
+    if (selectedDate != null) {
       setState(() {
-        purchaseDate = DateFormat("dd/MM/yy").format(selectDate);
+        // selectedDate hoche DateTime er object
+        _productPurchaseDate = selectedDate;
       });
     }
   }
 
 // save korle 2ta class er object create hobe
   void saveProduct() {
+    // selectedDate jodi null hoi
+    if (_productPurchaseDate == null) {
+      showMsg(context, 'Please select a purchase date');
+      // return korle code theke  ber hoye jabe ar porer code gulo execute korbena
+      return;
+    }
+    if (_imageUrl == null) {
+      showMsg(context, 'Please select an image');
+      return;
+    }
+
     if (formKey.currentState!.validate()) {
       final productModel = ProductModel(
         name: productNameController.text,
@@ -442,10 +478,11 @@ class _NewProductPageState extends State<NewProductPage> {
 
       final purchaseModel = PurchaseModel(
           dateModel: DateModel(
-            timestamp: Timestamp.now(),
-            day: DateTime.now().day,
-            month: DateTime.now().month,
-            year: DateTime.now().year,
+            // admin jr date pick korse seta hoche _productPurchaseDate akta DateTime er object
+            timestamp: Timestamp.fromDate(_productPurchaseDate!),
+            day: _productPurchaseDate!.day,
+            month: _productPurchaseDate!.month,
+            year: _productPurchaseDate!.year,
           ),
           purchaseprice: num.parse(productPurchasePriceController.text),
           quantity: num.parse(productQuantityController.text));
@@ -454,7 +491,7 @@ class _NewProductPageState extends State<NewProductPage> {
       final catModel =
           context.read<ProductProvider>().getCategoryModelByCatName(_category!);
 
-// catModel hoche  akahte category er model
+// catModel hoche  akahne category er model
       context
           .read<ProductProvider>()
           .addNewProduct(productModel, purchaseModel, catModel)
@@ -463,7 +500,11 @@ class _NewProductPageState extends State<NewProductPage> {
 // tarpor sob gulo field reset kore dibo
         _resetField();
       }).catchError((error) {
+        // Future e error show korbe
         // batch operation successfull na hole error show korbe terminal e
+        showMsg(context, 'Could not save');
+        // throw error korle console/terminal e ekhte parbo error reason specifically
+        throw error;
       });
     }
   }
@@ -479,6 +520,7 @@ class _NewProductPageState extends State<NewProductPage> {
       _imageUrl = null;
       // category  hoche droupdownvalue category er
       _category = null;
+      _productPurchaseDate = null;
     });
   }
 }

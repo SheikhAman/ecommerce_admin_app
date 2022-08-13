@@ -54,11 +54,11 @@ class DBHelper {
     productModel.id = proDoc.id; // model er field e docment id set koralam
     purchaseModel.id = purDoc.id; // model er field e docment id set koralam
     purchaseModel.productID =
-        purDoc.id; // model er field e docment id set koralam
+        proDoc.id; // model er field e docment id set koralam
 
 // wb.set mane se future e data save korbe databaase e
     wd.set(
-        proDoc, purchaseModel.toMap()); // document e map akare data save korlam
+        proDoc, productModel.toMap()); // document e map akare data save korlam
     wd.set(purDoc, purchaseModel.toMap());
     wd.update(catDoc, {
       'productCount': count
@@ -74,4 +74,26 @@ class DBHelper {
 // collection product  er  notun collection get korar query
   static Stream<QuerySnapshot<Map<String, dynamic>>> getAllProducts() =>
       _db.collection(collectionProduct).snapshots();
+
+// getting productInfo from id using  this query
+  static Stream<DocumentSnapshot<Map<String, dynamic>>> getProductById(
+          String id) =>
+      _db.collection(collectionProduct).doc(id).snapshots();
+
+// product er id diye purchase er collection get kora
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getPurchaseByProductId(
+          String pid) =>
+      // sob productId er shate match korle purchaseId snapshot pathabe
+      // onkegulo where method ak shate use korte pari
+      // purchase er collection pabo akta specific product er
+      // product er id jodi collectionPurchase er id er equal hoi tahole sob gulo docId pabo
+      _db
+          .collection(collectionPurchase)
+          .where(productId, isEqualTo: pid)
+          .snapshots();
+
+  // common update method for product Details page
+  static Future<void> updateProduct(String id, Map<String, dynamic> map) {
+    return _db.collection(collectionProduct).doc(id).update(map);
+  }
 }
