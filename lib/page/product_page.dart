@@ -1,12 +1,12 @@
-import 'package:ecom_day_42/pages/new_product_page.dart';
-import 'package:ecom_day_42/pages/product_details_page.dart';
+import 'package:ecom_day_42/page/product_details_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/product_provider.dart';
+import 'new_product_page.dart';
 
 class ProductPage extends StatelessWidget {
-  static const String routeName = '/product_page';
+  static const String routeName = '/product';
   const ProductPage({Key? key}) : super(key: key);
 
   @override
@@ -14,30 +14,34 @@ class ProductPage extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, NewProductPage.routeName),
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       appBar: AppBar(
-        title: Text('Product Page'),
+        title: const Text('Products'),
       ),
       body: Consumer<ProductProvider>(
         builder: (context, provider, _) => provider.productList.isEmpty
             ? const Center(
-                child: const Text('No Item found'),
+                child: Text('No item found'),
               )
             : ListView.builder(
                 itemCount: provider.productList.length,
                 itemBuilder: (context, index) {
-                  // index er category model ber korlam
                   final product = provider.productList[index];
                   return ListTile(
                     onTap: () => Navigator.pushNamed(
-                      context,
-                      ProductDetailsPage.routeName,
-                      arguments: product.id,
+                        context, ProductDetailsPage.routeName,
+                        arguments: product.id),
+                    title: Text(
+                      product.name!,
+                      style: TextStyle(
+                          color:
+                              product.available ? Colors.black : Colors.grey),
                     ),
-                    title: Text(product.name!),
+                    trailing: Text('Stock: ${product.stock}'),
                   );
-                }),
+                },
+              ),
       ),
     );
   }

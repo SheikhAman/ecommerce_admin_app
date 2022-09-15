@@ -1,49 +1,41 @@
-import 'package:ecom_day_42/models/date_model.dart';
+import 'date_model.dart';
 
-const String purchaseId = "id";
-const String purchaseProductId = "productId";
-const String purchaseDateModel = "dateModel";
-const String purchasePrice = "price";
-const String purchaseQuantity = "quantity";
+const String purchaseId = 'id';
+const String purchaseProductId = 'productId';
+const String purchasePrice = 'price';
+const String purchaseQuantity = 'quantity';
+const String purchaseDateModel = 'date_model';
 
 class PurchaseModel {
-  String? id;
-  String? productID;
+  String? id, productId;
   DateModel dateModel;
-  num purchaseprice;
-  num quantity;
+  num price, quantity;
 
   PurchaseModel({
     this.id,
-    this.productID,
+    this.productId,
     required this.dateModel,
-    required this.purchaseprice,
+    required this.price,
     required this.quantity,
   });
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       purchaseId: id,
-      purchaseProductId: productID,
-      //database e object ke  map a convert kore rakhlam
-      purchaseDateModel: dateModel.toMap(),
-      purchasePrice: purchaseprice,
+      purchaseProductId: productId,
+      purchasePrice: price,
       purchaseQuantity: quantity,
+      purchaseDateModel: dateModel.toMap(),
     };
   }
 
-  factory PurchaseModel.fromMap(Map<String, dynamic> map) => PurchaseModel(
-      // field : map[key]
+  factory PurchaseModel.fromMap(Map<String, dynamic> map) {
+    return PurchaseModel(
       id: map[purchaseId],
-      productID: map[purchaseProductId],
-      // dateModel Object : dateModel er map ke object e convert korte hobe
+      productId: map[purchaseProductId],
       dateModel: DateModel.fromMap(map[purchaseDateModel]),
-      purchaseprice: map[purchasePrice],
-      quantity: map[purchaseQuantity]);
-
-  @override
-  String toString() {
-    // TODO: implement toString
-    return 'PurchaseModel{purchaseprice: $purchasePrice,dateModel: $dateModel, quantity: $quantity, id:$id,purchaseId: $purchaseId}';
+      price: map[purchasePrice],
+      quantity: map[purchaseQuantity],
+    );
   }
 }
