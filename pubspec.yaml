@@ -45,7 +45,28 @@ dependencies:
   intl:
   image_picker:
   flutter_easyloading: ^3.0.5
+  flutter_launcher_icons: "^0.10.0"
+#   flutter_native_splash: ^2.2.9
 
+# flutter_native_splash:
+  
+#   # color: "#d9d9d9"
+#   image: images/icon.png
+#   android: true
+#   ios: true
+
+  
+
+ 
+ 
+
+
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "images/icon.png"
+  
 
 dev_dependencies:
   flutter_test:

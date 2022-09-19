@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.ecom_day_42">
    <application
-        android:label="ecom_day_42"
+        android:label="ECOM ADMIN"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
